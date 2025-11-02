@@ -1,0 +1,55 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[dependency-groups]
+dev = ["pre-commit==4.3.0"]
+tests = ["marimo>=0.17.2", "pytest>=8.4.2"]
+
+[project]
+authors = [
+  {email = "contact@kidger.site", name = "Patrick Kidger"}
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: Apache Software License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3"
+]
+dependencies = ["matplotlib>=3.7.1"]
+description = "Typst extension, adding support for generating images from a companion Marimo notebook"
+keywords = ["typst", "matplotlib", "plotting", "marimo"]
+license = {file = "LICENSE"}
+name = "typst_marimo"
+readme = "README.md"
+requires-python = "~=3.12"
+urls = {repository = "https://github.com/patrick-kidger/typst_marimo"}
+version = "0.1.0"
+
+[tool.hatch.build]
+include = ["typst_marimo/*"]
+
+[tool.ruff]
+extend-include = ["*.ipynb"]
+src = []
+
+[tool.ruff.lint]
+fixable = ["I001", "F401", "UP"]
+ignore = ["E402", "E721", "E731", "E741", "F722"]
+select = ["E", "F", "I001", "UP"]
+
+[tool.ruff.lint.flake8-import-conventions.extend-aliases]
+"collections" = "co"
+"functools" = "ft"
+"itertools" = "it"
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+extra-standard-library = ["typing_extensions"]
+lines-after-imports = 2
+order-by-type = false
+
+[tool.uv]
+default-groups = ["dev", "tests"]
