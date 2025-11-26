@@ -24,11 +24,15 @@ _last_modified: None | int = None
 def _get_key(obj):
     # We rely on the fact that Marimo itself does not allow multiple global variables
     # with the same name. This ensures that each of our outputs has a unique name.
+    keys = []
     for key in dir(_main):
         if getattr(_main, key) is obj and not key.startswith("_"):
-            break
-    else:
+            keys.append(key)
+    if len(keys) == 0:
         raise ValueError("The provided argument cannot be found in the Marimo globals.")
+    if len(keys) > 1:
+        raise ValueError(f"Multiple arguments with this value are found in the Marimo globals: {keys}.")
+    [key] = keys
     return key
 
 

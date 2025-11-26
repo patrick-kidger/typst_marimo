@@ -58,3 +58,9 @@ In Typst:
 // `"math"` or `"code"`.
 #let my-value = import-value-from-marimo("your-notebook.py", "y", mode: "markup")
 ```
+
+## FAQ
+
+**Typst incorrectly states that the Marimo notebook is out of date?**
+
+Marimo is happy to ignore some whitespace changes and in this case will avoid recompiling; Typst is not so lenient about detecting this. The easiest way to resolve this is to force a re-run of the whole notebook, via the 'Restart kernel' command in Marimo.
