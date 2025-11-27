@@ -19,4 +19,4 @@ repos:
     rev: v1.1.405
     hooks:
       - id: pyright
-        additional_dependencies: [matplotlib]
+        additional_dependencies: [marimo, matplotlib, pytest]

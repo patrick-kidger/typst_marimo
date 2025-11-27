@@ -3,7 +3,7 @@ import pathlib
 import shutil
 import sys
 from collections.abc import Callable
-from typing import Any, cast, TypeVar
+from typing import cast, TypeVar
 
 import matplotlib.artist
 import matplotlib.figure
@@ -12,7 +12,10 @@ import matplotlib.figure
 _here = pathlib.Path(__file__).resolve().parent
 _main = sys.modules["__main__"]
 if "marimo" not in sys.modules:
-    raise ValueError("typst-marimo must be used from within Marimo. However, Marimo has not been imported.")
+    raise ValueError(
+        "typst-marimo must be used from within Marimo. However, Marimo has not been "
+        "imported."
+    )
 _notebook_filepath_str = _main.__file__
 _notebook_filepath = pathlib.Path(cast(str, _notebook_filepath_str)).resolve()
 _base_outdir = _notebook_filepath.parent / ".typst-marimo"
@@ -52,17 +55,24 @@ def _get_key(obj):
     if len(keys) == 0:
         raise ValueError("The provided argument cannot be found in the Marimo globals.")
     if len(keys) > 1:
-        raise ValueError(f"Multiple arguments with this value are found in the Marimo globals: {keys}.")
+        raise ValueError(
+            f"Multiple arguments with this value are found in the Marimo "
+            f"globals: {keys}."
+        )
     [key] = keys
     return key
 
 
-def export_image_to_typst(fig: matplotlib.figure.Figure | matplotlib.artist.Artist | list[matplotlib.artist.Artist]) -> None:
+def export_image_to_typst[Artist: matplotlib.artist.Artist](
+    fig: matplotlib.figure.Figure | matplotlib.artist.Artist | list[Artist],
+) -> None:
     if isinstance(fig, matplotlib.figure.Figure):
         fig2 = fig
     elif isinstance(fig, matplotlib.artist.Artist):
         fig2 = fig.figure
-    elif isinstance(fig, list) and all(isinstance(f, matplotlib.artist.Artist) for f in fig):
+    elif isinstance(fig, list) and all(
+        isinstance(f, matplotlib.artist.Artist) for f in fig
+    ):
         # Return from e.g. `plt.plot(...)`
         [fig2] = {f.figure for f in fig}
     else:

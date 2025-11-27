@@ -49,14 +49,22 @@ _multiple = "Multiple arguments with this value"
 
 
 @pytest.mark.parametrize("call_directly", (False, True))
-@pytest.mark.parametrize("broken,errmsg", (("broken1.py", _not_found), ("broken2.py", _not_found), ("broken3.py", _multiple)))
+@pytest.mark.parametrize(
+    "broken,errmsg",
+    (("broken1.py", _not_found), ("broken2.py", _not_found), ("broken3.py", _multiple)),
+)
 def test_broken(call_directly, broken, errmsg, tmp_path):
     shutil.copy(_here / broken, tmp_path / broken)
     if call_directly:
-        p = subprocess.run(["python", broken], cwd=tmp_path, check=False, capture_output=True)
+        p = subprocess.run(
+            ["python", broken], cwd=tmp_path, check=False, capture_output=True
+        )
     else:
         p = subprocess.run(
-            ["marimo", "export", "html", broken], cwd=tmp_path, check=False, capture_output=True
+            ["marimo", "export", "html", broken],
+            cwd=tmp_path,
+            check=False,
+            capture_output=True,
         )
     assert p.returncode != 0
     assert errmsg in p.stderr.decode()
