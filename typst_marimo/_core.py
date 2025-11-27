@@ -21,6 +21,27 @@ _outdir = _base_outdir / _notebook_filepath.name
 _last_modified: None | int = None
 
 
+def _clear():
+    global _last_modified
+    # Clean out directory on first call.
+    # Note that we can't do this dynamically during saving, as Marimo caches cell
+    # results, so we don't know which figures that we want to keep around.
+    _outdir.mkdir(parents=True, exist_ok=True)
+    if _last_modified is None:
+        if _outdir.exists():
+            for elem in _outdir.iterdir():
+                elem.unlink()
+        shutil.copy(_here / "lib.typ", _base_outdir / "lib.typ")
+    # Update the checksum if necessary. This is to prevent Typst from allowing
+    # compilation without also having up-to-date figures.
+    modified = _notebook_filepath.stat().st_mtime_ns
+    if modified != _last_modified:
+        _last_modified = modified
+        (_outdir / "checksum").write_bytes(
+            hashlib.sha1(_notebook_filepath.read_bytes()).digest()
+        )
+
+
 def _get_key(obj):
     # We rely on the fact that Marimo itself does not allow multiple global variables
     # with the same name. This ensures that each of our outputs has a unique name.
@@ -37,8 +58,6 @@ def _get_key(obj):
 
 
 def export_image_to_typst(fig: matplotlib.figure.Figure | matplotlib.artist.Artist | list[matplotlib.artist.Artist]) -> None:
-    global _last_modified
-
     if isinstance(fig, matplotlib.figure.Figure):
         fig2 = fig
     elif isinstance(fig, matplotlib.artist.Artist):
@@ -49,26 +68,7 @@ def export_image_to_typst(fig: matplotlib.figure.Figure | matplotlib.artist.Arti
     else:
         raise ValueError(f"Received non-figure {type(fig)}")
     assert isinstance(fig2, matplotlib.figure.Figure)
-
-    # Clean out directory on first call.
-    # Note that we can't do this dynamically during saving, as Marimo caches cell
-    # results, so we don't know which figures that we want to keep around.
-    _outdir.mkdir(parents=True, exist_ok=True)
-    if _last_modified is None:
-        if _outdir.exists():
-            for elem in _outdir.iterdir():
-                elem.unlink()
-        shutil.copy(_here / "lib.typ", _base_outdir / "lib.typ")
-
-    # Update the checksum if necessary. This is to prevent Typst from allowing
-    # compilation without also having up-to-date figures.
-    modified = _notebook_filepath.stat().st_mtime_ns
-    if modified != _last_modified:
-        _last_modified = modified
-        (_outdir / "checksum").write_bytes(
-            hashlib.sha1(_notebook_filepath.read_bytes()).digest()
-        )
-
+    _clear()
     # Now save the figure. We do *not* cache the call to `fn`: we let Marimo's
     # cell-level caching handle this. Otherwise we may have the same `fn`, whose
     # dependencies change, and which would not then update.
@@ -80,6 +80,7 @@ _T = TypeVar("_T")
 
 
 def export_value_to_typst(obj: _T, transform: Callable[[_T], str] = str) -> None:
+    _clear()
     key = _get_key(obj)
     obj_str = transform(obj)
     if not isinstance(obj_str, str):

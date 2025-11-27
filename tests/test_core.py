@@ -44,15 +44,19 @@ def test_core(call_directly: bool, tmp_path: pathlib.Path):
     )
 
 
+_not_found = "The provided argument cannot be found in the Marimo globals."
+_multiple = "Multiple arguments with this value"
+
+
 @pytest.mark.parametrize("call_directly", (False, True))
-def test_broken(call_directly, tmp_path):
-    for broken in ("broken1.py", "broken2.py"):
-        shutil.copy(_here / broken, tmp_path / broken)
-        if call_directly:
-            p = subprocess.run(["python", broken], cwd=tmp_path, check=False, capture_output=True)
-        else:
-            p = subprocess.run(
-                ["marimo", "export", "html", broken], cwd=tmp_path, check=False, capture_output=True
-            )
-        assert p.returncode != 0
-        assert "The provided argument cannot be found in the Marimo globals." in p.stderr.decode()
+@pytest.mark.parametrize("broken,errmsg", (("broken1.py", _not_found), ("broken2.py", _not_found), ("broken3.py", _multiple)))
+def test_broken(call_directly, broken, errmsg, tmp_path):
+    shutil.copy(_here / broken, tmp_path / broken)
+    if call_directly:
+        p = subprocess.run(["python", broken], cwd=tmp_path, check=False, capture_output=True)
+    else:
+        p = subprocess.run(
+            ["marimo", "export", "html", broken], cwd=tmp_path, check=False, capture_output=True
+        )
+    assert p.returncode != 0
+    assert errmsg in p.stderr.decode()
