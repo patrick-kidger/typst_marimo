@@ -83,7 +83,7 @@ def export_image_to_typst[Artist: matplotlib.artist.Artist](
     # cell-level caching handle this. Otherwise we may have the same `fn`, whose
     # dependencies change, and which would not then update.
     key = _get_key(fig)
-    fig2.savefig(str(_outdir / key) + ".png")
+    fig2.savefig(str(_outdir / key) + ".png", bbox_inches="tight")
 
 
 _T = TypeVar("_T")
